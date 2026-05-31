@@ -14,7 +14,7 @@ function App() {
   const [isAdding, setIsAdding] = useState(false);
 
   // ⚠️ URL Back4App Aktif Anda ⚠️
-  const baseUrl = import.meta.env.VITE_API_URL;
+  const baseUrl = 'https://bimasatria-enterprise-erp-api.hf.space';
 
   // ========================================================
   // [BARU] FUNGSI AUTO-LOGIN SAAT HALAMAN DI-REFRESH
