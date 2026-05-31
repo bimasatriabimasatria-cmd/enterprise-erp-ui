@@ -14,7 +14,7 @@ function App() {
   const [isAdding, setIsAdding] = useState(false);
 
   // ⚠️ URL Back4App Aktif Anda ⚠️
-  const baseUrl = 'https://enterpriseerpapi-wcfc8hrl.b4a.run';
+  const baseUrl = import.meta.env.VITE_API_URL;
 
   // ========================================================
   // [BARU] FUNGSI AUTO-LOGIN SAAT HALAMAN DI-REFRESH
