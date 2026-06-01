@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import axios from 'axios';
+import HrPage from './pages/HrPage';
+import FinancePage from './pages/FinancePage';
 
 // ⚠️ URL HUGGING FACE ANDA ⚠️
 const baseUrl = 'https://bimasatria-enterprise-erp-api.hf.space';
@@ -66,8 +68,8 @@ function AdminLayout({ children }) {
         <nav className="flex-1 overflow-y-auto py-4 space-y-1">
           <Link to="/" className="block px-6 py-3 hover:bg-slate-800 transition">📊 Dashboard</Link>
           <Link to="/inventory" className="block px-6 py-3 hover:bg-slate-800 transition">📦 Inventory & Gudang</Link>
-          <Link to="#" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-500">💰 Finance (Coming Soon)</Link>
-          <Link to="#" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-500">👥 HR & Payroll (Coming Soon)</Link>
+          <Link to="/finance" className="block px-6 py-3 hover:bg-slate-800 transition text-white">💰 Finance & Akuntansi</Link>
+          <Link to="/hrd" className="block px-6 py-3 hover:bg-slate-800 transition text-white">👥 HR & Payroll</Link>
           <Link to="#" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-500">🤝 CRM & Sales (Coming Soon)</Link>
           <Link to="#" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-500">⚙️ Manufacturing (Coming Soon)</Link>
         </nav>
@@ -217,6 +219,8 @@ function App() {
         {/* Rute yang dilindungi AdminLayout */}
         <Route path="/" element={ <ProtectedRoute><AdminLayout><Dashboard /></AdminLayout></ProtectedRoute> } />
         <Route path="/inventory" element={ <ProtectedRoute><AdminLayout><InventoryPage /></AdminLayout></ProtectedRoute> } />
+        <Route path="/hrd" element={ <ProtectedRoute><AdminLayout><HrPage /></AdminLayout></ProtectedRoute> } />
+        <Route path="/finance" element={ <ProtectedRoute><AdminLayout><FinancePage /></AdminLayout></ProtectedRoute> } />
       </Routes>
     </BrowserRouter>
   );

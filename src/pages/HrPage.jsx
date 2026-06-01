@@ -21,7 +21,7 @@ export default function HrPage() {
   const fetchEmployees = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`${baseUrl}/api/employees`, { 
+      const response = await axios.get(`${baseUrl}/api/hr/employees`, {  
         headers: { Authorization: `Bearer ${token}` } 
       });
       setEmployees(response.data.data || []);
@@ -42,7 +42,7 @@ export default function HrPage() {
         HireDate: formData.HireDate ? new Date(formData.HireDate).toISOString() : new Date().toISOString()
       };
 
-      await axios.post(`${baseUrl}/api/employees`, payload, { 
+      await axios.post(`${baseUrl}/api/hr/employees`, payload, { 
         headers: { Authorization: `Bearer ${token}` } 
       });
       
