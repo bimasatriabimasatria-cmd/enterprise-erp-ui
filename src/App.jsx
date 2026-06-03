@@ -5,6 +5,7 @@ import HrPage from './pages/HrPage';
 import FinancePage from './pages/FinancePage';
 import AccountPage from './pages/AccountPage';
 import InventoryPage from './pages/InventoryPage';
+import CrmPage from './pages/CrmPage';
 
 // ⚠️ URL HUGGING FACE ANDA ⚠️
 const baseUrl = 'https://bimasatria-enterprise-erp-api.hf.space';
@@ -73,7 +74,8 @@ function AdminLayout({ children }) {
           <Link to="/finance" className="block px-6 py-3 hover:bg-slate-800 transition text-white">💰 Finance & Akuntansi</Link>
           <Link to="/accounts" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-300 pl-10 text-sm">↳ Buku Besar (COA)</Link>
           <Link to="/hrd" className="block px-6 py-3 hover:bg-slate-800 transition text-white">👥 HR & Payroll</Link>
-          <Link to="#" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-500">🤝 CRM & Sales (Coming Soon)</Link>
+          {/* Ubah baris CRM yang lama menjadi ini: */}
+          <Link to="/crm" className="block px-6 py-3 hover:bg-slate-800 transition text-white">🤝 CRM & Sales</Link>
           <Link to="#" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-500">⚙️ Manufacturing (Coming Soon)</Link>
         </nav>
       </div>
@@ -137,6 +139,8 @@ function App() {
         <Route path="/hrd" element={ <ProtectedRoute><AdminLayout><HrPage /></AdminLayout></ProtectedRoute> } />
         <Route path="/finance" element={ <ProtectedRoute><AdminLayout><FinancePage /></AdminLayout></ProtectedRoute> } />
         <Route path="/accounts" element={ <ProtectedRoute><AdminLayout><AccountPage /></AdminLayout></ProtectedRoute> } />
+        {/* Tambahkan rute ini di dalam kelompok rute ProtectedRoute lainnya */}
+        <Route path="/crm" element={ <ProtectedRoute><AdminLayout><CrmPage /></AdminLayout></ProtectedRoute> } />
       </Routes>
     </BrowserRouter>
   );
