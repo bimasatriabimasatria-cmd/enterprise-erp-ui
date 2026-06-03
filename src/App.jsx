@@ -73,6 +73,7 @@ function AdminLayout({ children }) {
           <Link to="/" className="block px-6 py-3 hover:bg-slate-800 transition">📊 Dashboard</Link>
           <Link to="/inventory" className="block px-6 py-3 hover:bg-slate-800 transition">📦 Inventory & Gudang</Link>
           <Link to="/procurement" className="block px-6 py-3 hover:bg-slate-800 transition text-white">🛒 Procurement (PO)</Link>
+          <Link to="/finance" className="block px-6 py-3 hover:bg-slate-800 transition text-white">💰 Finance & Akuntansi</Link>
           <Link to="/accounts" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-300 pl-10 text-sm">↳ Buku Besar (COA)</Link>
           <Link to="/hrd" className="block px-6 py-3 hover:bg-slate-800 transition text-white">👥 HR & Payroll</Link>
           {/* Ubah baris CRM yang lama menjadi ini: */}
