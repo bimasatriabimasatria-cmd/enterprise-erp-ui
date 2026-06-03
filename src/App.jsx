@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import axios from 'axios';
+import DashboardPage from './pages/DashboardPage';
 import HrPage from './pages/HrPage';
 import FinancePage from './pages/FinancePage';
 import AccountPage from './pages/AccountPage';
@@ -71,7 +72,7 @@ function AdminLayout({ children }) {
           <p className="text-xs text-slate-400 mt-1">ERP System v2.0</p>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 space-y-1">
-          <Link to="/" className="block px-6 py-3 hover:bg-slate-800 transition">📊 Dashboard</Link>
+          <Link to="/dashboard" className="block px-6 py-3 hover:bg-slate-800 transition">📊 Dashboard</Link>
           <Link to="/inventory" className="block px-6 py-3 hover:bg-slate-800 transition">📦 Inventory & Gudang</Link>
           <Link to="/procurement" className="block px-6 py-3 hover:bg-slate-800 transition text-white">🛒 Procurement (PO)</Link>
           <Link to="/manufacturing" className="block px-6 py-3 hover:bg-slate-800 transition text-white">🏭 Pabrik & Produksi</Link>
@@ -102,27 +103,6 @@ function AdminLayout({ children }) {
 }
 
 // ==========================================
-// 3. HALAMAN DASHBOARD (BERANDA)
-// ==========================================
-function Dashboard() {
-  return (
-    <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Ringkasan Perusahaan</h1>
-      <div className="grid grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <p className="text-gray-500 text-sm font-semibold">Total Aset Gudang</p>
-          <p className="text-3xl font-bold text-blue-600 mt-2">Aktif</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <p className="text-gray-500 text-sm font-semibold">Status Server</p>
-          <p className="text-3xl font-bold text-green-600 mt-2">Online 🟢</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ==========================================
 // 5. SISTEM PENGATUR RUTE (ROUTER)
 // ==========================================
 // Komponen pelindung agar harus login
@@ -138,7 +118,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         
         {/* Rute yang dilindungi AdminLayout */}
-        <Route path="/" element={ <ProtectedRoute><AdminLayout><Dashboard /></AdminLayout></ProtectedRoute> } />
+        <Route path="/dashboard" element={ <ProtectedRoute><AdminLayout><DashboardPage /></AdminLayout></ProtectedRoute> } />
         <Route path="/inventory" element={ <ProtectedRoute><AdminLayout><InventoryPage /></AdminLayout></ProtectedRoute> } />
         <Route path="/procurement" element={ <ProtectedRoute><AdminLayout><PurchaseOrderPage /></AdminLayout></ProtectedRoute> } />
         <Route path="/manufacturing" element={ <ProtectedRoute><AdminLayout><ManufacturingPage /></AdminLayout></ProtectedRoute> } />
