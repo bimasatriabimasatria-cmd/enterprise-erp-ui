@@ -4,6 +4,7 @@ import axios from 'axios';
 import HrPage from './pages/HrPage';
 import FinancePage from './pages/FinancePage';
 import AccountPage from './pages/AccountPage';
+import InventoryPage from './pages/InventoryPage';
 
 // ⚠️ URL HUGGING FACE ANDA ⚠️
 const baseUrl = 'https://bimasatria-enterprise-erp-api.hf.space';
