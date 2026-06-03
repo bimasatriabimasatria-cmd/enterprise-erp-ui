@@ -11,7 +11,6 @@ export default function HrPage() {
   const [formData, setFormData] = useState({
     nik: `EMP-${Date.now().toString().slice(-5)}`,
     name: '',
-    department: 'Produksi & Gudang',
     position: '',
     salary: '',
     hire_date: new Date().toISOString().split('T')[0]
@@ -41,16 +40,12 @@ export default function HrPage() {
     const token = localStorage.getItem('token');
     
     try {
-      // TAKTIK JARING PUKAT: Kirim ke semua kemungkinan nama variabel gaji!
-      const salaryNum = parseFloat(formData.salary) || 0;
+      // TAKTIK SNIPER: Hanya kirim basic_salary sebagai Angka Mutlak!
       const payload = {
         nik: formData.nik,
         name: formData.name,
-        department: formData.department,
         position: formData.position,
-        basic_salary: salaryNum, 
-        base_salary: salaryNum,   
-        salary: salaryNum,
+        basic_salary: Number(formData.salary) || 0, 
         hire_date: formData.hire_date
       };
 
@@ -69,7 +64,7 @@ export default function HrPage() {
       setShowForm(false);
       setEditingId(null);
       setFormData({ 
-        nik: `EMP-${Date.now().toString().slice(-5)}`, name: '', department: 'Produksi & Gudang', position: '', salary: '', hire_date: new Date().toISOString().split('T')[0] 
+        nik: `EMP-${Date.now().toString().slice(-5)}`, name: '', position: '', salary: '', hire_date: new Date().toISOString().split('T')[0] 
       });
       fetchEmployees();
     } catch (err) {
@@ -84,9 +79,8 @@ export default function HrPage() {
     setFormData({
       nik: emp.NIK || emp.nik || '',
       name: emp.Name || emp.name || '',
-      department: emp.Department || emp.department || 'Produksi & Gudang',
       position: emp.Position || emp.position || '',
-      salary: emp.BasicSalary || emp.BaseSalary || emp.basic_salary || emp.base_salary || 0,
+      salary: emp.BasicSalary || emp.basic_salary || 0, // Ambil dari kolom yang benar
       hire_date: emp.HireDate ? emp.HireDate.split('T')[0] : new Date().toISOString().split('T')[0]
     });
     setShowForm(true);
@@ -112,10 +106,7 @@ export default function HrPage() {
     if (confirmPay) alert(`💸 BUKTI TRANSFER: Gaji sebesar Rp ${salary.toLocaleString('id-ID')} telah berhasil dikirim ke rekening ${name}!`);
   };
 
-  // Kalkulasi Total Beban Gaji (Membaca dari semua kemungkinan variabel Backend)
-  const totalSalaryBurden = employees.reduce((sum, emp) => {
-    return sum + (emp.BasicSalary || emp.BaseSalary || emp.basic_salary || emp.base_salary || 0);
-  }, 0);
+  const totalSalaryBurden = employees.reduce((sum, emp) => sum + (emp.BasicSalary || emp.basic_salary || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -147,7 +138,6 @@ export default function HrPage() {
             </button>
           </div>
 
-          {/* FORM INPUT/EDIT KARYAWAN */}
           {showForm && (
             <div className="bg-white p-6 rounded-xl shadow-sm border border-indigo-100 relative">
                {editingId && (
@@ -157,20 +147,11 @@ export default function HrPage() {
               )}
               <h2 className="text-lg font-bold text-indigo-800 mb-4">{editingId ? 'Edit Data Karyawan' : 'Formulir Perekrutan Baru'}</h2>
               <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-                <div><label className="block text-xs font-semibold text-gray-600 mb-1">Nomor Induk Karyawan (NIK)</label><input type="text" required value={formData.nik} onChange={(e) => setFormData({...formData, nik: e.target.value})} className="w-full p-2 border rounded bg-gray-50 font-mono text-sm" /></div>
+                <div><label className="block text-xs font-semibold text-gray-600 mb-1">Nomor Induk (NIK)</label><input type="text" readOnly value={formData.nik} className="w-full p-2 border rounded bg-gray-200 font-mono text-sm" /></div>
                 <div><label className="block text-xs font-semibold text-gray-600 mb-1">Nama Lengkap</label><input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full p-2 border rounded bg-gray-50" /></div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Departemen</label>
-                  <select required value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} className="w-full p-2 border rounded bg-gray-50">
-                    <option value="Direksi & Manajemen">Direksi & Manajemen</option>
-                    <option value="Produksi & Gudang">Produksi & Gudang</option>
-                    <option value="Sales & Marketing">Sales & Marketing</option>
-                    <option value="Finance & HRD">Finance & HRD</option>
-                  </select>
-                </div>
                 <div><label className="block text-xs font-semibold text-gray-600 mb-1">Jabatan (Position)</label><input type="text" required value={formData.position} onChange={(e) => setFormData({...formData, position: e.target.value})} className="w-full p-2 border rounded bg-gray-50" /></div>
                 <div><label className="block text-xs font-semibold text-gray-600 mb-1">Tanggal Bergabung</label><input type="date" required value={formData.hire_date} onChange={(e) => setFormData({...formData, hire_date: e.target.value})} className="w-full p-2 border rounded bg-gray-50" /></div>
-                <div><label className="block text-xs font-semibold text-gray-600 mb-1">Gaji Pokok / Salary (Rp)</label><input type="number" min="0" required value={formData.salary} onChange={(e) => setFormData({...formData, salary: e.target.value})} className="w-full p-2 border rounded bg-gray-50" /></div>
+                <div className="col-span-2"><label className="block text-xs font-semibold text-gray-600 mb-1">Gaji Pokok / Salary (Rp)</label><input type="number" min="0" required value={formData.salary} onChange={(e) => setFormData({...formData, salary: e.target.value})} className="w-full p-2 border rounded bg-gray-50" /></div>
                 
                 <div className="col-span-2 mt-4">
                   <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition">
@@ -201,11 +182,9 @@ export default function HrPage() {
                       </div>
                       <div className="space-y-3 text-sm text-gray-600 bg-slate-50 p-3 rounded-lg border">
                         <div className="flex justify-between"><span className="font-semibold text-gray-500 text-xs uppercase">NIK</span><span className="font-mono text-gray-800 font-bold">{emp.NIK || emp.nik}</span></div>
-                        <div className="flex justify-between border-t pt-2"><span className="font-semibold text-gray-500 text-xs uppercase">Dept</span><span className="text-gray-800 font-medium">{emp.Department || emp.department}</span></div>
-                        <div className="flex justify-between border-t pt-2"><span className="font-semibold text-gray-500 text-xs uppercase">Gaji</span><span className="text-emerald-600 font-bold">Rp {(emp.BasicSalary || emp.BaseSalary || emp.basic_salary || emp.base_salary || 0).toLocaleString('id-ID')}</span></div>
+                        <div className="flex justify-between border-t pt-2"><span className="font-semibold text-gray-500 text-xs uppercase">Gaji</span><span className="text-emerald-600 font-bold">Rp {(emp.BasicSalary || emp.basic_salary || 0).toLocaleString('id-ID')}</span></div>
                       </div>
                     </div>
-                    {/* TOMBOL EDIT & HAPUS */}
                     <div className="bg-gray-50 p-3 border-t flex justify-end space-x-2 rounded-b-xl">
                       <button onClick={() => handleEdit(emp)} className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition">✏️ Edit</button>
                       <button onClick={() => handleDelete(emp.ID || emp.id, name)} className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition">🗑️ Hapus</button>
@@ -232,7 +211,7 @@ export default function HrPage() {
             <tbody className="text-sm divide-y divide-gray-100 bg-gray-50">
               {employees.map((emp) => {
                 const name = emp.Name || emp.name;
-                const salary = emp.BasicSalary || emp.BaseSalary || emp.basic_salary || emp.base_salary || 0; 
+                const salary = emp.BasicSalary || emp.basic_salary || 0; 
                 return (
                   <tr key={emp.ID || emp.id} className="hover:bg-white transition-colors">
                     <td className="p-4"><p className="font-bold text-gray-800 text-base">{name}</p><p className="text-xs text-gray-500 mt-1">{emp.Position || emp.position} • <span className="font-mono text-indigo-600">{emp.NIK || emp.nik}</span></p></td>
