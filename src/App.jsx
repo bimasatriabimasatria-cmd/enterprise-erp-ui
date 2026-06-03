@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link, useNavigate, Navigate } from 'react
 import axios from 'axios';
 import HrPage from './pages/HrPage';
 import FinancePage from './pages/FinancePage';
+import AccountPage from './pages/AccountPage';
 
 // ⚠️ URL HUGGING FACE ANDA ⚠️
 const baseUrl = 'https://bimasatria-enterprise-erp-api.hf.space';
@@ -69,6 +70,7 @@ function AdminLayout({ children }) {
           <Link to="/" className="block px-6 py-3 hover:bg-slate-800 transition">📊 Dashboard</Link>
           <Link to="/inventory" className="block px-6 py-3 hover:bg-slate-800 transition">📦 Inventory & Gudang</Link>
           <Link to="/finance" className="block px-6 py-3 hover:bg-slate-800 transition text-white">💰 Finance & Akuntansi</Link>
+          <Link to="/accounts" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-300 pl-10 text-sm">↳ Buku Besar (COA)</Link>
           <Link to="/hrd" className="block px-6 py-3 hover:bg-slate-800 transition text-white">👥 HR & Payroll</Link>
           <Link to="#" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-500">🤝 CRM & Sales (Coming Soon)</Link>
           <Link to="#" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-500">⚙️ Manufacturing (Coming Soon)</Link>
@@ -221,6 +223,7 @@ function App() {
         <Route path="/inventory" element={ <ProtectedRoute><AdminLayout><InventoryPage /></AdminLayout></ProtectedRoute> } />
         <Route path="/hrd" element={ <ProtectedRoute><AdminLayout><HrPage /></AdminLayout></ProtectedRoute> } />
         <Route path="/finance" element={ <ProtectedRoute><AdminLayout><FinancePage /></AdminLayout></ProtectedRoute> } />
+        <Route path="/accounts" element={ <ProtectedRoute><AdminLayout><AccountPage /></AdminLayout></ProtectedRoute> } />
       </Routes>
     </BrowserRouter>
   );
