@@ -46,7 +46,13 @@ export default function InventoryPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const payload = { ...itemForm, price: parseFloat(itemForm.price), cost: parseFloat(itemForm.cost), stock: parseInt(itemForm.stock) };
+      const payload = { 
+        ...itemForm,
+        sku: itemForm.item_code,
+        price: parseFloat(itemForm.price), 
+        cost: parseFloat(itemForm.cost), 
+        stock: parseInt(itemForm.stock) 
+      };
       await axios.post(`${baseUrl}/api/items`, payload, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
       alert("✅ Master Barang Baru Berhasil Disimpan!");
       setShowItemForm(false);
