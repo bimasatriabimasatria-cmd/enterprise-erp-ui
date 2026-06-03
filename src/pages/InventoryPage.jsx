@@ -45,7 +45,7 @@ export default function InventoryPage() {
 
     try {
       // Sesuaikan URL ini dengan rute di warehouse_routes.go Anda (contoh: /api/warehouse)
-      await axios.post(`${baseUrl}/api/warehouse`, payload, { 
+      await axios.post(`${baseUrl}/api/warehouse/movement`, payload, { 
         headers: { Authorization: `Bearer ${token}` } 
       });
       alert("✅ Transaksi Gudang Berhasil Diproses!");
