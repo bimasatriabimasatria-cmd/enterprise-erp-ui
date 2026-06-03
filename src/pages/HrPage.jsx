@@ -42,6 +42,7 @@ export default function HrPage() {
     try {
       const payload = {
         ...formData,
+        salary: parseFloat(formData.base_salary),
         base_salary: parseFloat(formData.base_salary)
       };
 
@@ -68,7 +69,9 @@ export default function HrPage() {
     }
   };
 
-  const totalSalaryBurden = employees.reduce((sum, emp) => sum + (emp.BaseSalary || emp.base_salary || 0), 0);
+  const getSalary = (emp) => emp.Salary || emp.salary || emp.BaseSalary || emp.base_salary || 0;
+  
+  const totalSalaryBurden = employees.reduce((sum, emp) => sum + getSalary(emp), 0);
 
   return (
     <div className="space-y-6">
