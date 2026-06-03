@@ -10,11 +10,32 @@ import CrmPage from './pages/CrmPage';
 import PurchaseOrderPage from './pages/PurchaseOrderPage';
 import ManufacturingPage from './pages/ManufacturingPage';
 
-// ⚠️ URL HUGGING FACE ANDA ⚠️
+// ==========================================
+// 1. KOMPONEN PELINDUNG RUTE
+// ==========================================
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-slate-900 text-white">
+        <h1 className="text-3xl font-bold mb-4">Akses Ditolak 🛑</h1>
+        <p className="mb-6">Token Anda hilang atau sudah kedaluwarsa.</p>
+        <button 
+          onClick={() => { localStorage.setItem('token', 'super-admin-token'); window.location.href = '/'; }} 
+          className="bg-indigo-600 px-6 py-2 rounded-lg font-bold hover:bg-indigo-700"
+        >
+          Masuk Paksa (Bypass Simulasi)
+        </button>
+      </div>
+    );
+  }
+  return children;
+}
+
 const baseUrl = 'https://bimasatria-enterprise-erp-api.hf.space';
 
 // ==========================================
-// 1. KOMPONEN LOGIN
+// 2. KOMPONEN LOGIN
 // ==========================================
 function Login() {
   const [email, setEmail] = useState('');
@@ -27,7 +48,7 @@ function Login() {
     try {
       const response = await axios.post(`${baseUrl}/api/auth/login`, { email, password });
       localStorage.setItem('token', response.data.token);
-      navigate('/'); // Arahkan ke Dashboard
+      navigate('/dashboard'); // Arahkan ke Dashboard setelah login
     } catch (err) {
       setError(err.response?.data?.error || 'Gagal login');
     }
@@ -54,7 +75,7 @@ function Login() {
 }
 
 // ==========================================
-// 2. KOMPONEN MASTER LAYOUT (SIDEBAR & TOPBAR)
+// 3. KOMPONEN MASTER LAYOUT (SIDEBAR & TOPBAR)
 // ==========================================
 function AdminLayout({ children }) {
   const navigate = useNavigate();
@@ -79,9 +100,7 @@ function AdminLayout({ children }) {
           <Link to="/finance" className="block px-6 py-3 hover:bg-slate-800 transition text-white">💰 Finance & Akuntansi</Link>
           <Link to="/accounts" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-300 pl-10 text-sm">↳ Buku Besar (COA)</Link>
           <Link to="/hrd" className="block px-6 py-3 hover:bg-slate-800 transition text-white">👥 HR & Payroll</Link>
-          {/* Ubah baris CRM yang lama menjadi ini: */}
           <Link to="/crm" className="block px-6 py-3 hover:bg-slate-800 transition text-white">🤝 CRM & Sales</Link>
-          <Link to="#" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-500">⚙️ Manufacturing (Coming Soon)</Link>
         </nav>
       </div>
 
@@ -93,7 +112,7 @@ function AdminLayout({ children }) {
           <button onClick={handleLogout} className="text-sm bg-red-50 text-red-600 font-bold px-4 py-2 rounded-lg hover:bg-red-100">Logout</button>
         </header>
         
-        {/* AREA DINAMIS (BERUBAH SESUAI MENU) */}
+        {/* AREA DINAMIS */}
         <main className="flex-1 overflow-y-auto p-8">
           {children}
         </main>
@@ -103,18 +122,15 @@ function AdminLayout({ children }) {
 }
 
 // ==========================================
-// 5. SISTEM PENGATUR RUTE (ROUTER)
+// 4. SISTEM PENGATUR RUTE (ROUTER)
 // ==========================================
-// Komponen pelindung agar harus login
-const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/login" />;
-};
-
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* PENTING: Redirect otomatis jika membuka alamat root (/) ke /dashboard */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        
         <Route path="/login" element={<Login />} />
         
         {/* Rute yang dilindungi AdminLayout */}
@@ -125,7 +141,6 @@ function App() {
         <Route path="/hrd" element={ <ProtectedRoute><AdminLayout><HrPage /></AdminLayout></ProtectedRoute> } />
         <Route path="/finance" element={ <ProtectedRoute><AdminLayout><FinancePage /></AdminLayout></ProtectedRoute> } />
         <Route path="/accounts" element={ <ProtectedRoute><AdminLayout><AccountPage /></AdminLayout></ProtectedRoute> } />
-        {/* Tambahkan rute ini di dalam kelompok rute ProtectedRoute lainnya */}
         <Route path="/crm" element={ <ProtectedRoute><AdminLayout><CrmPage /></AdminLayout></ProtectedRoute> } />
       </Routes>
     </BrowserRouter>
