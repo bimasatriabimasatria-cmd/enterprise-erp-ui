@@ -6,6 +6,7 @@ import FinancePage from './pages/FinancePage';
 import AccountPage from './pages/AccountPage';
 import InventoryPage from './pages/InventoryPage';
 import CrmPage from './pages/CrmPage';
+import PurchaseOrderPage from './pages/PurchaseOrderPage';
 
 // ⚠️ URL HUGGING FACE ANDA ⚠️
 const baseUrl = 'https://bimasatria-enterprise-erp-api.hf.space';
@@ -71,7 +72,7 @@ function AdminLayout({ children }) {
         <nav className="flex-1 overflow-y-auto py-4 space-y-1">
           <Link to="/" className="block px-6 py-3 hover:bg-slate-800 transition">📊 Dashboard</Link>
           <Link to="/inventory" className="block px-6 py-3 hover:bg-slate-800 transition">📦 Inventory & Gudang</Link>
-          <Link to="/finance" className="block px-6 py-3 hover:bg-slate-800 transition text-white">💰 Finance & Akuntansi</Link>
+          <Link to="/procurement" className="block px-6 py-3 hover:bg-slate-800 transition text-white">🛒 Procurement (PO)</Link>
           <Link to="/accounts" className="block px-6 py-3 hover:bg-slate-800 transition text-slate-300 pl-10 text-sm">↳ Buku Besar (COA)</Link>
           <Link to="/hrd" className="block px-6 py-3 hover:bg-slate-800 transition text-white">👥 HR & Payroll</Link>
           {/* Ubah baris CRM yang lama menjadi ini: */}
@@ -136,6 +137,7 @@ function App() {
         {/* Rute yang dilindungi AdminLayout */}
         <Route path="/" element={ <ProtectedRoute><AdminLayout><Dashboard /></AdminLayout></ProtectedRoute> } />
         <Route path="/inventory" element={ <ProtectedRoute><AdminLayout><InventoryPage /></AdminLayout></ProtectedRoute> } />
+        <Route path="/procurement" element={ <ProtectedRoute><AdminLayout><PurchaseOrderPage /></AdminLayout></ProtectedRoute> } />
         <Route path="/hrd" element={ <ProtectedRoute><AdminLayout><HrPage /></AdminLayout></ProtectedRoute> } />
         <Route path="/finance" element={ <ProtectedRoute><AdminLayout><FinancePage /></AdminLayout></ProtectedRoute> } />
         <Route path="/accounts" element={ <ProtectedRoute><AdminLayout><AccountPage /></AdminLayout></ProtectedRoute> } />
