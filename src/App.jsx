@@ -56,11 +56,42 @@ function RoleProtectedRoute({ children, allowedRoles }) {
 // ==========================================
 // 2. KOMPONEN LOGIN
 // ==========================================
+// ==========================================
+// 2. KOMPONEN LOGIN DENGAN RADAR PWA
+// ==========================================
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  // STATE UNTUK RADAR PWA (Tombol Install)
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+
+  useEffect(() => {
+    // Menangkap sinyal gaib dari Google Chrome yang mengizinkan instalasi PWA
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault(); // Cegah popup bawaan browser yang jelek
+      setDeferredPrompt(e); // Simpan sinyalnya
+      setShowInstallBtn(true); // Munculkan tombol cantik kita
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt(); // Tembakkan sinyal install ke HP!
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('✅ Karyawan menginstal aplikasi!');
+        setShowInstallBtn(false); // Sembunyikan tombol setelah diinstal
+      }
+      setDeferredPrompt(null);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -68,7 +99,6 @@ function Login() {
       const response = await axios.post(`${baseUrl}/api/auth/login`, { email, password });
       const token = response.data.token;
       
-      // Simpan Tiket dan Bongkar Jabatannya!
       localStorage.setItem('token', token);
       const decoded = parseJwt(token);
       localStorage.setItem('role', decoded?.role || 'staff');
@@ -82,26 +112,41 @@ function Login() {
 
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center relative overflow-hidden">
-      {/* Dekorasi Latar Belakang */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
 
-      <div className="bg-white p-10 rounded-2xl shadow-2xl w-96 relative z-10">
-        <div className="text-center mb-8">
+      <div className="bg-white p-10 rounded-2xl shadow-2xl w-96 relative z-10 flex flex-col items-center">
+        <div className="text-center mb-8 w-full">
           <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
             <span className="text-3xl">🛡️</span>
           </div>
           <h1 className="text-2xl font-black text-slate-800 tracking-tight">Enterprise ERP</h1>
           <p className="text-xs text-gray-500 mt-1 font-semibold uppercase tracking-widest">Secure Access Gateway</p>
         </div>
-        {error && <div className="bg-red-50 text-red-600 font-bold p-3 rounded-lg text-xs mb-4 border border-red-200">{error}</div>}
-        <form onSubmit={handleLogin} className="space-y-4">
+        
+        {error && <div className="bg-red-50 text-red-600 font-bold p-3 w-full rounded-lg text-xs mb-4 border border-red-200">{error}</div>}
+        
+        <form onSubmit={handleLogin} className="space-y-4 w-full">
           <div><label className="block text-xs font-bold text-gray-600 mb-1">Email Karyawan</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium" placeholder="admin@erp.com" required /></div>
           <div><label className="block text-xs font-bold text-gray-600 mb-1">Password</label><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium" placeholder="••••••••" required /></div>
           <button type="submit" className="w-full bg-indigo-600 text-white font-black py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 mt-2">
             Akses Sistem ➔
           </button>
         </form>
+
+        {/* 🚀 TOMBOL INSTALL PWA (Hanya Muncul di Android/Chrome yang belum install) */}
+        {showInstallBtn && (
+          <div className="mt-8 pt-6 border-t border-gray-100 w-full text-center">
+            <p className="text-xs text-gray-500 mb-3 font-semibold">Tersedia untuk Smartphone Anda</p>
+            <button 
+              onClick={handleInstallApp}
+              className="w-full bg-slate-800 text-emerald-400 font-black py-3 rounded-lg hover:bg-slate-900 transition flex items-center justify-center space-x-2 border border-slate-700 shadow-lg"
+            >
+              <span className="text-xl">📱</span>
+              <span>Install Aplikasi ke HP</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
