@@ -29,13 +29,9 @@ function RoleProtectedRoute({ children, allowedRoles }) {
   const token = localStorage.getItem('token');
   const userRole = localStorage.getItem('role') || 'staff';
 
-  // 1. Jika tidak ada tiket masuk
   if (!token) return <Navigate to="/login" replace />;
-
-  // 2. Super Admin Bebas Masuk ke Mana Saja!
   if (userRole === 'super_admin') return children;
 
-  // 3. Jika jabatannya tidak ada di daftar yang diizinkan (Cek ID Card)
   if (!allowedRoles.includes(userRole)) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-slate-100 text-slate-800">
@@ -48,14 +44,9 @@ function RoleProtectedRoute({ children, allowedRoles }) {
       </div>
     );
   }
-
-  // 4. Jika diizinkan, silakan lewat!
   return children;
 }
 
-// ==========================================
-// 2. KOMPONEN LOGIN
-// ==========================================
 // ==========================================
 // 2. KOMPONEN LOGIN DENGAN RADAR PWA
 // ==========================================
@@ -65,29 +56,26 @@ function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // STATE UNTUK RADAR PWA (Tombol Install)
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBtn, setShowInstallBtn] = useState(false);
 
   useEffect(() => {
-    // Menangkap sinyal gaib dari Google Chrome yang mengizinkan instalasi PWA
     const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault(); // Cegah popup bawaan browser yang jelek
-      setDeferredPrompt(e); // Simpan sinyalnya
-      setShowInstallBtn(true); // Munculkan tombol cantik kita
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBtn(true);
     };
-
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
 
   const handleInstallApp = async () => {
     if (deferredPrompt) {
-      deferredPrompt.prompt(); // Tembakkan sinyal install ke HP!
+      deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        console.log('✅ Karyawan menginstal aplikasi!');
-        setShowInstallBtn(false); // Sembunyikan tombol setelah diinstal
+        console.log('✅ Aplikasi diinstal!');
+        setShowInstallBtn(false);
       }
       setDeferredPrompt(null);
     }
@@ -117,9 +105,7 @@ function Login() {
 
       <div className="bg-white p-10 rounded-2xl shadow-2xl w-96 relative z-10 flex flex-col items-center">
         <div className="text-center mb-8 w-full">
-          <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-            <span className="text-3xl">🛡️</span>
-          </div>
+          <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner"><span className="text-3xl">🛡️</span></div>
           <h1 className="text-2xl font-black text-slate-800 tracking-tight">Enterprise ERP</h1>
           <p className="text-xs text-gray-500 mt-1 font-semibold uppercase tracking-widest">Secure Access Gateway</p>
         </div>
@@ -129,21 +115,14 @@ function Login() {
         <form onSubmit={handleLogin} className="space-y-4 w-full">
           <div><label className="block text-xs font-bold text-gray-600 mb-1">Email Karyawan</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium" placeholder="admin@erp.com" required /></div>
           <div><label className="block text-xs font-bold text-gray-600 mb-1">Password</label><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium" placeholder="••••••••" required /></div>
-          <button type="submit" className="w-full bg-indigo-600 text-white font-black py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 mt-2">
-            Akses Sistem ➔
-          </button>
+          <button type="submit" className="w-full bg-indigo-600 text-white font-black py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg transform hover:-translate-y-0.5 mt-2">Akses Sistem ➔</button>
         </form>
 
-        {/* 🚀 TOMBOL INSTALL PWA (Hanya Muncul di Android/Chrome yang belum install) */}
         {showInstallBtn && (
           <div className="mt-8 pt-6 border-t border-gray-100 w-full text-center">
             <p className="text-xs text-gray-500 mb-3 font-semibold">Tersedia untuk Smartphone Anda</p>
-            <button 
-              onClick={handleInstallApp}
-              className="w-full bg-slate-800 text-emerald-400 font-black py-3 rounded-lg hover:bg-slate-900 transition flex items-center justify-center space-x-2 border border-slate-700 shadow-lg"
-            >
-              <span className="text-xl">📱</span>
-              <span>Install Aplikasi ke HP</span>
+            <button onClick={handleInstallApp} className="w-full bg-slate-800 text-emerald-400 font-black py-3 rounded-lg hover:bg-slate-900 transition flex items-center justify-center space-x-2 border border-slate-700 shadow-lg">
+              <span className="text-xl">📱</span><span>Install Aplikasi ke HP</span>
             </button>
           </div>
         )}
@@ -153,7 +132,112 @@ function Login() {
 }
 
 // ==========================================
-// 3. MASTER LAYOUT (SIDEBAR DINAMIS SESUAI JABATAN)
+// 3. FITUR DLC: ASISTEN AI (CHATBOT WIDGET)
+// ==========================================
+function ChatbotWidget() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([{ sender: 'ai', text: 'Halo! Saya AI Assistant ERP. Ada yang bisa saya bantu cek (**Karyawan**, **Stok Barang**, atau **Pendapatan**)?' }]);
+  const [inputText, setInputText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+
+    const userText = inputText;
+    setMessages(prev => [...prev, { sender: 'user', text: userText }]);
+    setInputText('');
+    setIsTyping(true);
+
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+    const lowerText = userText.toLowerCase();
+
+    let aiReply = "Maaf Kapten, saya kurang paham. Coba ketik kata kunci seperti: **'jumlah karyawan'**, **'stok gudang'**, atau **'total pendapatan'**.";
+
+    try {
+      // LOGIKA 1: CEK HRD
+      if (lowerText.includes('karyawan') || lowerText.includes('pegawai') || lowerText.includes('hrd') || lowerText.includes('orang')) {
+        const res = await axios.get(`${baseUrl}/api/hr/employees`, { headers }).catch(()=>({data:{data:[]}}));
+        const count = (res.data.data || []).length;
+        aiReply = `👨‍💼 Saat ini perusahaan memiliki **${count} karyawan** aktif yang terdaftar di database HRD.`;
+      } 
+      // LOGIKA 2: CEK INVENTORY GUDANG
+      else if (lowerText.includes('stok') || lowerText.includes('barang') || lowerText.includes('gudang') || lowerText.includes('inventory')) {
+        const res = await axios.get(`${baseUrl}/api/items`, { headers }).catch(()=>({data:{data:[]}}));
+        const items = res.data.data || [];
+        const lowStock = items.filter(i => (i.Stock || i.stock || 0) < 10);
+        aiReply = `📦 Terdapat **${items.length} jenis master barang** di gudang Anda. ${lowStock.length > 0 ? `⚠️ PERHATIAN: Ada **${lowStock.length} barang** yang stoknya menipis (<10)!` : 'Semua stok dalam status aman.'}`;
+      }
+      // LOGIKA 3: CEK FINANCE
+      else if (lowerText.includes('uang') || lowerText.includes('pendapatan') || lowerText.includes('keuangan') || lowerText.includes('finance') || lowerText.includes('revenue')) {
+        const res = await axios.get(`${baseUrl}/api/invoices`, { headers }).catch(()=>({data:{data:[]}}));
+        const invoices = res.data.data || [];
+        const revenue = invoices.reduce((sum, inv) => sum + (inv.TotalAmount || 0), 0);
+        aiReply = `💰 Berdasarkan faktur penjualan (Invoices), Total Pendapatan Kotor (Revenue) perusahaan saat ini adalah **Rp ${revenue.toLocaleString('id-ID')}**.`;
+      }
+    } catch (err) {
+      aiReply = "❌ Maaf, saya sedang mengalami kendala jaringan saat menghubungi Server Golang.";
+    }
+
+    // Jeda buatan agar terlihat sedang "berpikir"
+    setTimeout(() => {
+      setMessages(prev => [...prev, { sender: 'ai', text: aiReply }]);
+      setIsTyping(false);
+    }, 1200); 
+  };
+
+  // Render teks dengan efek tebal untuk kata yang diapit ** **
+  const formatText = (text) => text.split('**').map((part, i) => i % 2 === 1 ? <strong key={i} className="text-indigo-700">{part}</strong> : part);
+
+  return (
+    <div className="fixed bottom-6 right-6 z-[9999] print:hidden">
+      {isOpen && (
+        <div className="bg-white w-80 rounded-2xl shadow-2xl border border-gray-200 mb-4 overflow-hidden flex flex-col h-[400px] animate-fade-in-up">
+          <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 p-4 text-white flex justify-between items-center shadow-md">
+            <div className="flex items-center space-x-2">
+              <span className="text-2xl">🤖</span>
+              <div><h3 className="font-bold text-sm">AI Assistant</h3><p className="text-[10px] text-indigo-200 flex items-center"><span className="w-2 h-2 bg-green-400 rounded-full inline-block mr-1 animate-pulse"></span> Online</p></div>
+            </div>
+            <button onClick={() => setIsOpen(false)} className="text-white hover:text-red-300 font-black text-lg transition transform hover:scale-110">✕</button>
+          </div>
+          
+          <div className="flex-1 p-4 overflow-y-auto bg-slate-50 space-y-3">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] p-3 rounded-xl text-sm shadow-sm ${msg.sender === 'user' ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-white border border-gray-100 text-gray-800 rounded-bl-none'}`}>
+                  {formatText(msg.text)}
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-white border border-gray-100 text-gray-400 p-3 rounded-xl rounded-bl-none shadow-sm text-xs flex space-x-1 items-center">
+                  <span className="animate-bounce">●</span><span className="animate-bounce" style={{animationDelay: '100ms'}}>●</span><span className="animate-bounce" style={{animationDelay: '200ms'}}>●</span>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <form onSubmit={handleSend} className="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
+            <input type="text" value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Tanya AI..." className="flex-1 p-2.5 bg-slate-100 border-transparent rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none" />
+            <button type="submit" disabled={isTyping} className="bg-indigo-600 text-white p-2.5 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 font-bold">➤</button>
+          </form>
+        </div>
+      )}
+      
+      {!isOpen && (
+        <button onClick={() => setIsOpen(true)} className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-full p-4 shadow-2xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 hover:scale-105 flex items-center justify-center relative group">
+          <span className="text-3xl animate-bounce">💬</span>
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white">1</span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ==========================================
+// 4. MASTER LAYOUT (SIDEBAR DINAMIS SESUAI JABATAN)
 // ==========================================
 function AdminLayout({ children }) {
   const navigate = useNavigate();
@@ -161,11 +245,10 @@ function AdminLayout({ children }) {
   const userName = localStorage.getItem('user_name') || 'User';
 
   const handleLogout = () => {
-    localStorage.clear(); // Bersihkan semua memori
+    localStorage.clear();
     navigate('/login');
   };
 
-  // Logika Penyembunyian Menu
   const isSuperAdmin = userRole === 'super_admin';
   const isWarehouse = isSuperAdmin || userRole === 'warehouse_staff';
   const isFinance = isSuperAdmin || userRole === 'finance_staff';
@@ -173,7 +256,6 @@ function AdminLayout({ children }) {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* SIDEBAR */}
       <div className="w-64 bg-slate-900 text-white flex flex-col shadow-2xl relative z-20">
         <div className="p-6 text-center border-b border-slate-800">
           <h1 className="text-xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">ENTERPRISE</h1>
@@ -183,7 +265,6 @@ function AdminLayout({ children }) {
         <nav className="flex-1 overflow-y-auto py-4 space-y-1">
           <Link to="/dashboard" className="block px-6 py-3 hover:bg-slate-800 transition border-l-4 border-transparent hover:border-indigo-500">📊 Executive Dashboard</Link>
           
-          {/* MENU GUDANG & PABRIK (Hanya Gudang & Super Admin) */}
           {isWarehouse && (
             <div className="mt-4">
               <p className="px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Supply Chain</p>
@@ -193,7 +274,6 @@ function AdminLayout({ children }) {
             </div>
           )}
 
-          {/* MENU KEUANGAN & SALES (Hanya Finance & Super Admin) */}
           {isFinance && (
             <div className="mt-4">
               <p className="px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Finance & CRM</p>
@@ -203,7 +283,6 @@ function AdminLayout({ children }) {
             </div>
           )}
 
-          {/* MENU HRD (Hanya HR & Super Admin) */}
           {isHR && (
             <div className="mt-4">
               <p className="px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Human Resources</p>
@@ -212,7 +291,6 @@ function AdminLayout({ children }) {
           )}
         </nav>
 
-        {/* PROFIL PENGGUNA DI BAWAH SIDEBAR */}
         <div className="p-4 border-t border-slate-800 bg-slate-950">
           <div className="flex items-center space-x-3 mb-3">
             <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-sm shadow-lg">{userName.charAt(0).toUpperCase()}</div>
@@ -225,18 +303,19 @@ function AdminLayout({ children }) {
         </div>
       </div>
 
-      {/* KONTEN UTAMA */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <main className="flex-1 overflow-y-auto p-8 z-10 bg-slate-50/50">
           {children}
         </main>
+        {/* 🔥 WIDGET AI DITANAM DI SINI AGAR MUNCUL DI SEMUA HALAMAN 🔥 */}
+        <ChatbotWidget />
       </div>
     </div>
   );
 }
 
 // ==========================================
-// 4. SISTEM PENGATUR RUTE (ROUTER & SATPAM)
+// 5. SISTEM PENGATUR RUTE (ROUTER & SATPAM)
 // ==========================================
 function App() {
   return (
@@ -245,18 +324,11 @@ function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/login" element={<Login />} />
         
-        {/* SEMUA JABATAN BOLEH MASUK DASHBOARD */}
         <Route path="/dashboard" element={ <RoleProtectedRoute allowedRoles={['warehouse_staff', 'finance_staff', 'hr_staff']}><AdminLayout><DashboardPage /></AdminLayout></RoleProtectedRoute> } />
-        
-        {/* ZONA GUDANG (Hanya warehouse_staff) */}
         <Route path="/inventory" element={ <RoleProtectedRoute allowedRoles={['warehouse_staff']}><AdminLayout><InventoryPage /></AdminLayout></RoleProtectedRoute> } />
         <Route path="/procurement" element={ <RoleProtectedRoute allowedRoles={['warehouse_staff']}><AdminLayout><PurchaseOrderPage /></AdminLayout></RoleProtectedRoute> } />
         <Route path="/manufacturing" element={ <RoleProtectedRoute allowedRoles={['warehouse_staff']}><AdminLayout><ManufacturingPage /></AdminLayout></RoleProtectedRoute> } />
-        
-        {/* ZONA HRD (Hanya hr_staff) */}
         <Route path="/hrd" element={ <RoleProtectedRoute allowedRoles={['hr_staff']}><AdminLayout><HrPage /></AdminLayout></RoleProtectedRoute> } />
-        
-        {/* ZONA KEUANGAN & SALES (Hanya finance_staff) */}
         <Route path="/finance" element={ <RoleProtectedRoute allowedRoles={['finance_staff']}><AdminLayout><FinancePage /></AdminLayout></RoleProtectedRoute> } />
         <Route path="/accounts" element={ <RoleProtectedRoute allowedRoles={['finance_staff']}><AdminLayout><AccountPage /></AdminLayout></RoleProtectedRoute> } />
         <Route path="/crm" element={ <RoleProtectedRoute allowedRoles={['finance_staff']}><AdminLayout><CrmPage /></AdminLayout></RoleProtectedRoute> } />
