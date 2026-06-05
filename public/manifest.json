@@ -1,0 +1,17 @@
+{
+  "name": "Enterprise ERP System",
+  "short_name": "ERP v2",
+  "description": "Sistem Manajemen Enterprise Terintegrasi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
