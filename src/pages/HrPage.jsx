@@ -234,12 +234,6 @@ export default function HrPage() {
 
         {activeTab === 'directory' && (
           <div className="space-y-6 animate-fade-in-up">
-            <div className="flex justify-end">
-              <button onClick={() => {setShowForm(!showForm); setEditingId(null);}} className={`${showForm ? 'bg-red-500 hover:bg-red-600' : 'bg-indigo-600 hover:bg-indigo-700'} text-white px-4 py-2 rounded-lg font-bold shadow-sm transition`}>
-                {showForm ? 'Batal / Tutup Form' : '+ Rekrut Karyawan Baru'}
-              </button>
-            </div>
-
             {/* 🚀 TOMBOL EXPORT CSV ADA DI SINI */}
             <div className="flex justify-end space-x-3">
               <button onClick={handleExportCSV} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold shadow-sm transition flex items-center">
@@ -249,7 +243,7 @@ export default function HrPage() {
                 {showForm ? 'Batal / Tutup Form' : '+ Rekrut Karyawan Baru'}
               </button>
             </div>
-            
+
             {showForm && (
               <div className="bg-white p-6 rounded-xl shadow-sm border border-indigo-100 relative">
                 {editingId && <div className="absolute top-0 right-0 bg-amber-500 text-white px-4 py-1 rounded-bl-xl rounded-tr-xl font-bold text-xs animate-pulse">✏️ Mode Edit</div>}
