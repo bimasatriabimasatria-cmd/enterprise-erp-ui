@@ -14,9 +14,6 @@ import ManufacturingPage from './pages/ManufacturingPage';
 
 const baseUrl = 'https://bimasatria-enterprise-erp-api.hf.space';
 
-// ==========================================
-// ALAT PEMBONGKAR TOKEN (Membaca Jabatan)
-// ==========================================
 const parseJwt = (token) => {
   try { return JSON.parse(atob(token.split('.')[1])); } 
   catch (e) { return null; }
@@ -34,11 +31,11 @@ function RoleProtectedRoute({ children, allowedRoles }) {
 
   if (!allowedRoles.includes(userRole)) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-slate-100 text-slate-800">
+      <div className="flex flex-col items-center justify-center h-screen bg-slate-100 text-slate-800 p-6 text-center">
         <span className="text-6xl mb-4">⛔</span>
-        <h1 className="text-3xl font-black mb-2 text-red-600">Akses Ditolak (403)</h1>
-        <p className="mb-6 font-medium text-gray-500">Jabatan Anda (<span className="text-indigo-600 uppercase">{userRole}</span>) tidak memiliki wewenang membuka brankas ini.</p>
-        <button onClick={() => window.location.href = '/dashboard'} className="bg-slate-800 text-white px-6 py-2 rounded-lg font-bold hover:bg-slate-900">
+        <h1 className="text-2xl md:text-3xl font-black mb-2 text-red-600">Akses Ditolak (403)</h1>
+        <p className="mb-6 font-medium text-gray-500 text-sm md:text-base">Jabatan Anda (<span className="text-indigo-600 uppercase">{userRole}</span>) tidak memiliki wewenang membuka brankas ini.</p>
+        <button onClick={() => window.location.href = '/dashboard'} className="bg-slate-800 text-white px-6 py-3 rounded-lg font-bold hover:bg-slate-900 w-full md:w-auto">
           Kembali ke Wilayah Aman
         </button>
       </div>
@@ -74,7 +71,6 @@ function Login() {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        console.log('✅ Aplikasi diinstal!');
         setShowInstallBtn(false);
       }
       setDeferredPrompt(null);
@@ -99,11 +95,11 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center relative overflow-hidden p-4">
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
 
-      <div className="bg-white p-10 rounded-2xl shadow-2xl w-96 relative z-10 flex flex-col items-center">
+      <div className="bg-white p-8 md:p-10 rounded-2xl shadow-2xl w-full max-w-md relative z-10 flex flex-col items-center">
         <div className="text-center mb-8 w-full">
           <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner"><span className="text-3xl">🛡️</span></div>
           <h1 className="text-2xl font-black text-slate-800 tracking-tight">Enterprise ERP</h1>
@@ -113,8 +109,8 @@ function Login() {
         {error && <div className="bg-red-50 text-red-600 font-bold p-3 w-full rounded-lg text-xs mb-4 border border-red-200">{error}</div>}
         
         <form onSubmit={handleLogin} className="space-y-4 w-full">
-          <div><label className="block text-xs font-bold text-gray-600 mb-1">Email Karyawan</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium" placeholder="admin@erp.com" required /></div>
-          <div><label className="block text-xs font-bold text-gray-600 mb-1">Password</label><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium" placeholder="••••••••" required /></div>
+          <div><label className="block text-xs font-bold text-gray-600 mb-1">Email Karyawan</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium text-sm" placeholder="admin@erp.com" required /></div>
+          <div><label className="block text-xs font-bold text-gray-600 mb-1">Password</label><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-medium text-sm" placeholder="••••••••" required /></div>
           <button type="submit" className="w-full bg-indigo-600 text-white font-black py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg transform hover:-translate-y-0.5 mt-2">Akses Sistem ➔</button>
         </form>
 
@@ -156,50 +152,45 @@ function ChatbotWidget() {
     let aiReply = "Maaf Kapten, saya kurang paham. Coba ketik kata kunci seperti: **'jumlah karyawan'**, **'stok gudang'**, atau **'total pendapatan'**.";
 
     try {
-      // LOGIKA 1: CEK HRD
       if (lowerText.includes('karyawan') || lowerText.includes('pegawai') || lowerText.includes('hrd') || lowerText.includes('orang')) {
         const res = await axios.get(`${baseUrl}/api/hr/employees`, { headers }).catch(()=>({data:{data:[]}}));
         const count = (res.data.data || []).length;
         aiReply = `👨‍💼 Saat ini perusahaan memiliki **${count} karyawan** aktif yang terdaftar di database HRD.`;
       } 
-      // LOGIKA 2: CEK INVENTORY GUDANG
       else if (lowerText.includes('stok') || lowerText.includes('barang') || lowerText.includes('gudang') || lowerText.includes('inventory')) {
         const res = await axios.get(`${baseUrl}/api/items`, { headers }).catch(()=>({data:{data:[]}}));
         const items = res.data.data || [];
         const lowStock = items.filter(i => (i.Stock || i.stock || 0) < 10);
         aiReply = `📦 Terdapat **${items.length} jenis master barang** di gudang Anda. ${lowStock.length > 0 ? `⚠️ PERHATIAN: Ada **${lowStock.length} barang** yang stoknya menipis (<10)!` : 'Semua stok dalam status aman.'}`;
       }
-      // LOGIKA 3: CEK FINANCE
       else if (lowerText.includes('uang') || lowerText.includes('pendapatan') || lowerText.includes('keuangan') || lowerText.includes('finance') || lowerText.includes('revenue')) {
         const res = await axios.get(`${baseUrl}/api/invoices`, { headers }).catch(()=>({data:{data:[]}}));
         const invoices = res.data.data || [];
         const revenue = invoices.reduce((sum, inv) => sum + (inv.TotalAmount || 0), 0);
-        aiReply = `💰 Berdasarkan faktur penjualan (Invoices), Total Pendapatan Kotor (Revenue) perusahaan saat ini adalah **Rp ${revenue.toLocaleString('id-ID')}**.`;
+        aiReply = `💰 Berdasarkan faktur penjualan, Total Pendapatan Kotor (Revenue) perusahaan saat ini adalah **Rp ${revenue.toLocaleString('id-ID')}**.`;
       }
     } catch (err) {
       aiReply = "❌ Maaf, saya sedang mengalami kendala jaringan saat menghubungi Server Golang.";
     }
 
-    // Jeda buatan agar terlihat sedang "berpikir"
     setTimeout(() => {
       setMessages(prev => [...prev, { sender: 'ai', text: aiReply }]);
       setIsTyping(false);
     }, 1200); 
   };
 
-  // Render teks dengan efek tebal untuk kata yang diapit ** **
   const formatText = (text) => text.split('**').map((part, i) => i % 2 === 1 ? <strong key={i} className="text-indigo-700">{part}</strong> : part);
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] print:hidden">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9999] print:hidden">
       {isOpen && (
-        <div className="bg-white w-80 rounded-2xl shadow-2xl border border-gray-200 mb-4 overflow-hidden flex flex-col h-[400px] animate-fade-in-up">
+        <div className="bg-white w-[90vw] md:w-80 max-w-sm rounded-2xl shadow-2xl border border-gray-200 mb-4 overflow-hidden flex flex-col h-[60vh] md:h-[400px] animate-fade-in-up">
           <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 p-4 text-white flex justify-between items-center shadow-md">
             <div className="flex items-center space-x-2">
               <span className="text-2xl">🤖</span>
               <div><h3 className="font-bold text-sm">AI Assistant</h3><p className="text-[10px] text-indigo-200 flex items-center"><span className="w-2 h-2 bg-green-400 rounded-full inline-block mr-1 animate-pulse"></span> Online</p></div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-white hover:text-red-300 font-black text-lg transition transform hover:scale-110">✕</button>
+            <button onClick={() => setIsOpen(false)} className="text-white hover:text-red-300 font-black text-xl px-2">✕</button>
           </div>
           
           <div className="flex-1 p-4 overflow-y-auto bg-slate-50 space-y-3">
@@ -220,16 +211,16 @@ function ChatbotWidget() {
           </div>
           
           <form onSubmit={handleSend} className="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
-            <input type="text" value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Tanya AI..." className="flex-1 p-2.5 bg-slate-100 border-transparent rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none" />
-            <button type="submit" disabled={isTyping} className="bg-indigo-600 text-white p-2.5 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 font-bold">➤</button>
+            <input type="text" value={inputText} onChange={(e) => setInputText(e.target.value)} placeholder="Tanya AI..." className="flex-1 p-2.5 bg-slate-100 border-transparent rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+            <button type="submit" disabled={isTyping} className="bg-indigo-600 text-white p-2.5 rounded-lg font-bold disabled:opacity-50">➤</button>
           </form>
         </div>
       )}
       
       {!isOpen && (
-        <button onClick={() => setIsOpen(true)} className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-full p-4 shadow-2xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 hover:scale-105 flex items-center justify-center relative group">
-          <span className="text-3xl animate-bounce">💬</span>
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white">1</span>
+        <button onClick={() => setIsOpen(true)} className="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white rounded-full p-4 shadow-2xl hover:scale-105 transition-all flex items-center justify-center relative">
+          <span className="text-2xl md:text-3xl animate-bounce">💬</span>
+          <span className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white">1</span>
         </button>
       )}
     </div>
@@ -237,12 +228,15 @@ function ChatbotWidget() {
 }
 
 // ==========================================
-// 4. MASTER LAYOUT (SIDEBAR DINAMIS SESUAI JABATAN)
+// 4. MASTER LAYOUT (SIDEBAR DINAMIS SESUAI JABATAN) - 🔥 DIPERBAIKI UNTUK MOBILE 🔥
 // ==========================================
 function AdminLayout({ children }) {
   const navigate = useNavigate();
   const userRole = localStorage.getItem('role') || 'staff';
   const userName = localStorage.getItem('user_name') || 'User';
+  
+  // 🔥 STATE BARU UNTUK MENU HAMBURGER (MOBILE)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -254,39 +248,56 @@ function AdminLayout({ children }) {
   const isFinance = isSuperAdmin || userRole === 'finance_staff';
   const isHR = isSuperAdmin || userRole === 'hr_staff';
 
+  // Fungsi untuk menutup menu otomatis saat diklik di HP
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
   return (
-    <div className="flex h-screen bg-gray-50">
-      <div className="w-64 bg-slate-900 text-white flex flex-col shadow-2xl relative z-20">
-        <div className="p-6 text-center border-b border-slate-800">
-          <h1 className="text-xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">ENTERPRISE</h1>
-          <p className="text-[10px] text-slate-400 mt-1 font-bold tracking-widest uppercase">ERP System v2.0</p>
+    <div className="flex h-screen bg-gray-50 overflow-hidden w-full">
+      
+      {/* OVERLAY HITAM UNTUK HP (Muncul saat menu terbuka) */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm transition-opacity"
+          onClick={closeMobileMenu}
+        ></div>
+      )}
+
+      {/* SIDEBAR (Tersembunyi di kiri saat layar sempit, muncul tetap saat layar lebar) */}
+      <div className={`fixed inset-y-0 left-0 transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-40 w-64 bg-slate-900 text-white flex flex-col shadow-2xl`}>
+        <div className="p-5 flex justify-between items-center border-b border-slate-800">
+          <div className="text-center w-full">
+            <h1 className="text-xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">ENTERPRISE</h1>
+            <p className="text-[10px] text-slate-400 mt-1 font-bold tracking-widest uppercase">ERP System v2.0</p>
+          </div>
+          {/* Tombol X untuk menutup di layar HP */}
+          <button onClick={closeMobileMenu} className="md:hidden text-slate-400 hover:text-white font-bold text-xl ml-2">✕</button>
         </div>
         
         <nav className="flex-1 overflow-y-auto py-4 space-y-1">
-          <Link to="/dashboard" className="block px-6 py-3 hover:bg-slate-800 transition border-l-4 border-transparent hover:border-indigo-500">📊 Executive Dashboard</Link>
+          <Link onClick={closeMobileMenu} to="/dashboard" className="block px-6 py-3 hover:bg-slate-800 transition border-l-4 border-transparent hover:border-indigo-500 text-sm md:text-base">📊 Executive Dashboard</Link>
           
           {isWarehouse && (
             <div className="mt-4">
               <p className="px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Supply Chain</p>
-              <Link to="/inventory" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">📦 Inventory & Gudang</Link>
-              <Link to="/procurement" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">🛒 Procurement (PO)</Link>
-              <Link to="/manufacturing" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">🏭 Pabrik & Produksi</Link>
+              <Link onClick={closeMobileMenu} to="/inventory" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">📦 Inventory & Gudang</Link>
+              <Link onClick={closeMobileMenu} to="/procurement" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">🛒 Procurement (PO)</Link>
+              <Link onClick={closeMobileMenu} to="/manufacturing" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">🏭 Pabrik & Produksi</Link>
             </div>
           )}
 
           {isFinance && (
             <div className="mt-4">
               <p className="px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Finance & CRM</p>
-              <Link to="/crm" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">🤝 CRM & Sales</Link>
-              <Link to="/finance" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">💰 Finance & Akuntansi</Link>
-              <Link to="/accounts" className="block px-6 py-2.5 hover:bg-slate-800 transition text-slate-400 pl-10 text-xs">↳ Buku Besar (COA)</Link>
+              <Link onClick={closeMobileMenu} to="/crm" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">🤝 CRM & Sales</Link>
+              <Link onClick={closeMobileMenu} to="/finance" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">💰 Finance & Akuntansi</Link>
+              <Link onClick={closeMobileMenu} to="/accounts" className="block px-6 py-2.5 hover:bg-slate-800 transition text-slate-400 pl-10 text-xs">↳ Buku Besar (COA)</Link>
             </div>
           )}
 
           {isHR && (
             <div className="mt-4">
               <p className="px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Human Resources</p>
-              <Link to="/hrd" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">👥 HR & Payroll</Link>
+              <Link onClick={closeMobileMenu} to="/hrd" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">👥 HR & Payroll</Link>
             </div>
           )}
         </nav>
@@ -303,11 +314,23 @@ function AdminLayout({ children }) {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden relative">
-        <main className="flex-1 overflow-y-auto p-8 z-10 bg-slate-50/50">
+      {/* KONTEN UTAMA */}
+      <div className="flex-1 flex flex-col w-full min-w-0 h-screen overflow-hidden relative bg-slate-50/50">
+        
+        {/* 🔥 HEADER MOBILE (Hanya muncul di HP) */}
+        <header className="md:hidden bg-slate-900 text-white h-14 flex items-center justify-between px-4 shadow-md z-20">
+          <div className="font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400 text-sm">ERP MOBILE</div>
+          {/* Tombol Garis Tiga (Hamburger) */}
+          <button onClick={() => setIsMobileMenuOpen(true)} className="text-2xl p-1 focus:outline-none">
+            ☰
+          </button>
+        </header>
+
+        {/* AREA KERJA DINAMIS */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 z-10 w-full">
           {children}
         </main>
-        {/* 🔥 WIDGET AI DITANAM DI SINI AGAR MUNCUL DI SEMUA HALAMAN 🔥 */}
+
         <ChatbotWidget />
       </div>
     </div>
