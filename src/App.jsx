@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link, useNavigate, Navigate } from 'react
 import axios from 'axios';
 
 // Import Semua Halaman
+import AuditPage from './pages/AuditPage';
 import DashboardPage from './pages/DashboardPage';
 import HrPage from './pages/HrPage';
 import FinancePage from './pages/FinancePage';
@@ -303,10 +304,19 @@ function AdminLayout({ children }) {
             </div>
           )}
 
+          {/* MENU HRD (Hanya HR & Super Admin) */}
           {isHR && (
             <div className="mt-4">
               <p className="px-6 text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Human Resources</p>
               <Link onClick={closeMobileMenu} to="/hrd" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm">👥 HR & Payroll</Link>
+            </div>
+          )}
+
+          {/* 🚀 MENU CCTV (HANYA SUPER ADMIN!) */}
+          {isSuperAdmin && (
+            <div className="mt-4">
+              <p className="px-6 text-[10px] font-black text-red-500 uppercase tracking-widest mb-2">System Security</p>
+              <Link onClick={closeMobileMenu} to="/audit" className="block px-6 py-2.5 hover:bg-slate-800 transition text-sm text-red-100 hover:text-red-400 border-l-4 border-transparent hover:border-red-500">🕵️‍♂️ CCTV & Audit Trail</Link>
             </div>
           )}
         </nav>
@@ -375,6 +385,9 @@ function App() {
         <Route path="/finance" element={ <RoleProtectedRoute allowedRoles={['finance_staff']}><AdminLayout><FinancePage /></AdminLayout></RoleProtectedRoute> } />
         <Route path="/accounts" element={ <RoleProtectedRoute allowedRoles={['finance_staff']}><AdminLayout><AccountPage /></AdminLayout></RoleProtectedRoute> } />
         <Route path="/crm" element={ <RoleProtectedRoute allowedRoles={['finance_staff']}><AdminLayout><CrmPage /></AdminLayout></RoleProtectedRoute> } />
+        <Route path="/audit" element={ <RoleProtectedRoute allowedRoles={['super_admin']}><AdminLayout><AuditPage /></AdminLayout></RoleProtectedRoute> } />
+        {/* 🚀 RUTE RAHASIA CCTV */}
+        <Route path="/audit" element={ <RoleProtectedRoute allowedRoles={['super_admin']}><AdminLayout><AuditPage /></AdminLayout></RoleProtectedRoute> } />
       </Routes>
     </BrowserRouter>
   );
