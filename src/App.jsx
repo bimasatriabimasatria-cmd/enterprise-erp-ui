@@ -70,9 +70,7 @@ function Login() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setShowInstallBtn(false);
-      }
+      if (outcome === 'accepted') setShowInstallBtn(false);
       setDeferredPrompt(null);
     }
   };
@@ -182,7 +180,7 @@ function ChatbotWidget() {
   const formatText = (text) => text.split('**').map((part, i) => i % 2 === 1 ? <strong key={i} className="text-indigo-700">{part}</strong> : part);
 
   return (
-    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9999] print:hidden">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9999] print:hidden no-invert">
       {isOpen && (
         <div className="bg-white w-[90vw] md:w-80 max-w-sm rounded-2xl shadow-2xl border border-gray-200 mb-4 overflow-hidden flex flex-col h-[60vh] md:h-[400px] animate-fade-in-up">
           <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 p-4 text-white flex justify-between items-center shadow-md">
@@ -228,15 +226,32 @@ function ChatbotWidget() {
 }
 
 // ==========================================
-// 4. MASTER LAYOUT (SIDEBAR DINAMIS SESUAI JABATAN) - 🔥 DIPERBAIKI UNTUK MOBILE 🔥
+// 4. MASTER LAYOUT (SIDEBAR DINAMIS & DARK MODE TANGGUH)
 // ==========================================
 function AdminLayout({ children }) {
   const navigate = useNavigate();
   const userRole = localStorage.getItem('role') || 'staff';
   const userName = localStorage.getItem('user_name') || 'User';
   
-  // 🔥 STATE BARU UNTUK MENU HAMBURGER (MOBILE)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // 🚀 STATE DARK MODE
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark';
+  });
+
+  // 🚀 EFEK PENYALAAN DARK MODE
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark-theme');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark-theme');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -248,28 +263,22 @@ function AdminLayout({ children }) {
   const isFinance = isSuperAdmin || userRole === 'finance_staff';
   const isHR = isSuperAdmin || userRole === 'hr_staff';
 
-  // Fungsi untuk menutup menu otomatis saat diklik di HP
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden w-full">
       
-      {/* OVERLAY HITAM UNTUK HP (Muncul saat menu terbuka) */}
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm transition-opacity"
-          onClick={closeMobileMenu}
-        ></div>
+        <div className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm transition-opacity no-invert" onClick={closeMobileMenu}></div>
       )}
 
-      {/* SIDEBAR (Tersembunyi di kiri saat layar sempit, muncul tetap saat layar lebar) */}
+      {/* SIDEBAR */}
       <div className={`fixed inset-y-0 left-0 transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-40 w-64 bg-slate-900 text-white flex flex-col shadow-2xl`}>
         <div className="p-5 flex justify-between items-center border-b border-slate-800">
           <div className="text-center w-full">
             <h1 className="text-xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">ENTERPRISE</h1>
             <p className="text-[10px] text-slate-400 mt-1 font-bold tracking-widest uppercase">ERP System v2.0</p>
           </div>
-          {/* Tombol X untuk menutup di layar HP */}
           <button onClick={closeMobileMenu} className="md:hidden text-slate-400 hover:text-white font-bold text-xl ml-2">✕</button>
         </div>
         
@@ -302,31 +311,42 @@ function AdminLayout({ children }) {
           )}
         </nav>
 
+        {/* 🚀 PROFIL PENGGUNA & TOMBOL DARK MODE DI SIDEBAR */}
         <div className="p-4 border-t border-slate-800 bg-slate-950">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-sm shadow-lg">{userName.charAt(0).toUpperCase()}</div>
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center font-bold text-sm shadow-lg no-invert">{userName.charAt(0).toUpperCase()}</div>
             <div className="overflow-hidden">
               <p className="text-xs font-bold text-white truncate">{userName}</p>
               <p className="text-[10px] text-emerald-400 font-bold uppercase truncate">{userRole.replace('_', ' ')}</p>
             </div>
           </div>
-          <button onClick={handleLogout} className="w-full text-xs bg-red-500/10 text-red-400 font-bold px-4 py-2 rounded hover:bg-red-500 hover:text-white transition">🚪 Keluar (Logout)</button>
+          
+          {/* SAKELAR DARK MODE */}
+          <button 
+            onClick={toggleTheme} 
+            className="w-full mb-2 text-xs bg-slate-800 text-slate-300 font-bold px-4 py-2.5 rounded hover:bg-slate-700 transition flex justify-center items-center gap-2 border border-slate-700"
+          >
+            <span className="text-base no-invert">{isDarkMode ? '☀️' : '🌙'}</span> 
+            {isDarkMode ? 'Mode Terang' : 'Mode Gelap'}
+          </button>
+
+          <button onClick={handleLogout} className="w-full text-xs bg-red-500/10 text-red-400 font-bold px-4 py-2 rounded hover:bg-red-500 hover:text-white transition border border-red-900/50">🚪 Keluar (Logout)</button>
         </div>
       </div>
 
       {/* KONTEN UTAMA */}
       <div className="flex-1 flex flex-col w-full min-w-0 h-screen overflow-hidden relative bg-slate-50/50">
         
-        {/* 🔥 HEADER MOBILE (Hanya muncul di HP) */}
+        {/* HEADER MOBILE */}
         <header className="md:hidden bg-slate-900 text-white h-14 flex items-center justify-between px-4 shadow-md z-20">
           <div className="font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400 text-sm">ERP MOBILE</div>
-          {/* Tombol Garis Tiga (Hamburger) */}
-          <button onClick={() => setIsMobileMenuOpen(true)} className="text-2xl p-1 focus:outline-none">
-            ☰
-          </button>
+          <div className="flex items-center gap-3">
+            {/* SAKELAR DARK MODE UNTUK HP */}
+            <button onClick={toggleTheme} className="text-xl p-1 focus:outline-none no-invert">{isDarkMode ? '☀️' : '🌙'}</button>
+            <button onClick={() => setIsMobileMenuOpen(true)} className="text-2xl p-1 focus:outline-none">☰</button>
+          </div>
         </header>
 
-        {/* AREA KERJA DINAMIS */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 z-10 w-full">
           {children}
         </main>

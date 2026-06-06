@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================
+   🌗 SIHIR DARK MODE INSTAN (INVERT ENGINE)
+   ========================================== */
+html.dark-theme {
+  /* Membalikkan semua warna terang jadi gelap, tapi menjaga warna asli (hue) agar tidak aneh */
+  filter: invert(1) hue-rotate(180deg);
+  background-color: #111; /* Menghindari layar putih saat memuat ulang */
+}
+
+/* KEMBALIKAN GAMBAR & GRAFIK AGAR TIDAK TERLIHAT SEPERTI KLISÉ FOTO NEGATIF */
+html.dark-theme img,
+html.dark-theme video,
+html.dark-theme .recharts-wrapper,
+html.dark-theme .no-invert {
+  filter: invert(1) hue-rotate(180deg);
+}
