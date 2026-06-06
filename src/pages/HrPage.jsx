@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { downloadCSV } from '../utils/exportCSV';
 
 export default function HrPage() {
   const [employees, setEmployees] = useState([]);
@@ -105,6 +106,20 @@ export default function HrPage() {
     setTimeout(() => {
       window.print();
     }, 100);
+  };
+
+  const handleExportCSV = () => {
+    const formattedData = employees.map((emp, index) => ({
+      "No": index + 1,
+      "NIK Karyawan": emp.NIK || emp.nik || "-",
+      "Nama Lengkap": emp.Name || emp.name || "-",
+      "Jabatan": emp.Position || emp.position || "-",
+      "Gaji Pokok (Rp)": emp.BasicSalary || emp.basic_salary || 0,
+      "Tanggal Masuk": emp.HireDate ? new Date(emp.HireDate).toLocaleDateString('id-ID') : "-",
+      "Status": emp.IsActive !== false ? "Aktif" : "Non-Aktif"
+    }));
+    
+    downloadCSV(formattedData, `Data_Karyawan_ERP_${new Date().toISOString().split('T')[0]}.csv`);
   };
 
   const totalSalaryBurden = employees.reduce((sum, emp) => sum + (emp.BasicSalary || emp.basic_salary || 0), 0);
@@ -225,6 +240,16 @@ export default function HrPage() {
               </button>
             </div>
 
+            {/* 🚀 TOMBOL EXPORT CSV ADA DI SINI */}
+            <div className="flex justify-end space-x-3">
+              <button onClick={handleExportCSV} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold shadow-sm transition flex items-center">
+                <span className="mr-2">📊</span> Download Data (Excel/CSV)
+              </button>
+              <button onClick={() => {setShowForm(!showForm); setEditingId(null);}} className={`${showForm ? 'bg-red-500 hover:bg-red-600' : 'bg-indigo-600 hover:bg-indigo-700'} text-white px-4 py-2 rounded-lg font-bold shadow-sm transition`}>
+                {showForm ? 'Batal / Tutup Form' : '+ Rekrut Karyawan Baru'}
+              </button>
+            </div>
+            
             {showForm && (
               <div className="bg-white p-6 rounded-xl shadow-sm border border-indigo-100 relative">
                 {editingId && <div className="absolute top-0 right-0 bg-amber-500 text-white px-4 py-1 rounded-bl-xl rounded-tr-xl font-bold text-xs animate-pulse">✏️ Mode Edit</div>}
