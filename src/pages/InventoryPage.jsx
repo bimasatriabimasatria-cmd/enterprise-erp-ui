@@ -126,9 +126,20 @@ export default function InventoryPage() {
       {/* HEADER & TOMBOL AKSI */}
       <div className="flex justify-between items-center border-b pb-4">
         <h1 className="text-2xl font-bold text-gray-800">📦 Master Data & Inventory</h1>
-        <div className="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border">
-          <label className="text-xs font-bold text-gray-600">Import CSV:</label>
-          <input type="file" accept=".csv" onChange={handleImportCSV} className="text-xs" />
+        {/* Wadah yang rapi dan elegan */}
+        <div className="flex items-center gap-3 bg-white p-2 border rounded-lg shadow-sm">
+          <label className="text-xs font-bold text-gray-600 uppercase tracking-widest pl-2">
+            Import Data:
+          </label>
+          <label className="cursor-pointer bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center">
+            <span>📂 Pilih File CSV</span>
+            <input 
+              type="file" 
+              accept=".csv" 
+              onChange={handleImportCSV} 
+              className="hidden" 
+            />
+          </label>
         </div>
         <div className="flex space-x-2">
           <button onClick={() => setShowWhForm(!showWhForm)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-bold shadow-sm transition">
