@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // Import Semua Halaman
 import AuditPage from './pages/AuditPage';
-import SettingsPage from './pages/SettingsPage'; // 🚀 IMPORT HALAMAN SETTINGS
+import SettingsPage from './pages/SettingsPage';
 import DashboardPage from './pages/DashboardPage';
 import HrPage from './pages/HrPage';
 import FinancePage from './pages/FinancePage';
@@ -276,9 +276,30 @@ function AdminLayout({ children }) {
 }
 
 // ==========================================
-// 5. SISTEM PENGATUR RUTE
+// 5. SISTEM PENGATUR RUTE (DENGAN PEMBAJAK TAB BROWSER)
 // ==========================================
 function App() {
+  
+  // 🚀 SIHIR PEMBAJAK TAB BROWSER (FAVICON & TITLE)
+  useEffect(() => {
+    const companyName = localStorage.getItem('company_name') || 'Enterprise ERP';
+    const companyLogo = localStorage.getItem('company_logo');
+
+    // 1. Mengubah Judul Tab Google Chrome
+    document.title = companyName;
+
+    // 2. Mengubah Ikon Tab (Favicon) Google Chrome
+    if (companyLogo) {
+      let link = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = companyLogo;
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>
