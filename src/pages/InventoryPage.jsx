@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { parseCSV } from '../utils/importCSV';
 
 export default function InventoryPage() {
   const [items, setItems] = useState([]);
@@ -91,11 +92,44 @@ export default function InventoryPage() {
     setLoading(false);
   };
 
+  // 2. Tambahkan Fungsi Import di dalam komponen
+  const handleImportCSV = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const confirmImport = window.confirm("⚠️ Import data massal? Sistem akan menambahkan data dari file ini.");
+    if (!confirmImport) return;
+
+    try {
+      const data = await parseCSV(file);
+      const token = localStorage.getItem('token');
+      
+      // Kirim data ke API (Anda mungkin perlu menyesuaikan loop ini sesuai endpoint API Anda)
+      for (const item of data) {
+        await axios.post(`${baseUrl}/api/items`, {
+          item_code: item['Kode Barang'],
+          name: item['Nama Barang'],
+          stock: parseInt(item['Stok']),
+          price: parseFloat(item['Harga'])
+        }, { headers: { Authorization: `Bearer ${token}` } });
+      }
+      
+      alert("✅ Import massal berhasil!");
+      fetchData(); // Refresh list barang
+    } catch (err) {
+      alert("❌ Gagal import: " + err.message);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* HEADER & TOMBOL AKSI */}
       <div className="flex justify-between items-center border-b pb-4">
         <h1 className="text-2xl font-bold text-gray-800">📦 Master Data & Inventory</h1>
+        <div className="flex gap-2 items-center bg-gray-50 p-2 rounded-lg border">
+          <label className="text-xs font-bold text-gray-600">Import CSV:</label>
+          <input type="file" accept=".csv" onChange={handleImportCSV} className="text-xs" />
+        </div>
         <div className="flex space-x-2">
           <button onClick={() => setShowWhForm(!showWhForm)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-bold shadow-sm transition">
             {showWhForm ? 'Tutup Form Gudang' : '+ Buat Lokasi Gudang'}
