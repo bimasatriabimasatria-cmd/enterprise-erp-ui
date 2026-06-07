@@ -163,6 +163,21 @@ function AdminLayout({ children }) {
   const navigate = useNavigate();
   const userRole = localStorage.getItem('role') || 'staff';
   const userName = localStorage.getItem('user_name') || 'User';
+
+  // Di dalam komponen AdminLayout atau App
+  const [appConfig, setAppConfig] = useState({ name: 'ENTERPRISE', logo: null });
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await axios.get(`${baseUrl}/api/settings`);
+        setAppConfig({ name: res.data.company_name, logo: res.data.logo });
+      } catch (err) {
+        console.log("Menggunakan default config");
+      }
+    };
+    loadConfig();
+  }, []);
   
   // 🚀 BACA IDENTITAS DARI STORAGE
   const companyName = localStorage.getItem('company_name') || 'ENTERPRISE';

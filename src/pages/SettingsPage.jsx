@@ -25,16 +25,21 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    localStorage.setItem('company_name', companyName.toUpperCase());
-    if (logoBase64) {
-      localStorage.setItem('company_logo', logoBase64);
-    } else {
-      localStorage.removeItem('company_logo');
+    const token = localStorage.getItem('token');
+    try {
+      // Kirim ke API Golang Anda
+      await axios.post(`${baseUrl}/api/settings`, { 
+        company_name: companyName, 
+        logo: logoBase64 
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      
+      alert("✅ Identitas berhasil tersinkronisasi ke server!");
+      window.location.reload();
+    } catch (err) {
+      alert("❌ Gagal simpan ke server: " + err.message);
     }
-    alert(`✅ Identitas Perusahaan berhasil diubah menjadi: ${companyName.toUpperCase()}`);
-    window.location.reload(); // Paksa reload agar semua menu ter-update!
   };
 
   return (
