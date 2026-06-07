@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { downloadCSV } from '../utils/exportCSV'; // 🚀 IMPORT MESIN EXPORT
 
 export default function ManufacturingPage() {
   const [activeTab, setActiveTab] = useState('orders'); 
@@ -9,7 +10,6 @@ export default function ManufacturingPage() {
   const [warehouses, setWarehouses] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fitur Baru: State untuk Edit & Detail
   const [editingBomId, setEditingBomId] = useState(null);
   const [viewingBom, setViewingBom] = useState(null);
 
@@ -78,7 +78,7 @@ export default function ManufacturingPage() {
         quantity: c.Quantity || c.quantity
       }))
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Gulir ke atas
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const deleteBom = async (id, name) => {
@@ -113,20 +113,35 @@ export default function ManufacturingPage() {
     } catch (err) { alert("❌ Gagal: " + (err.response?.data?.error || err.message)); }
   };
 
+  // 🚀 FUNGSI EXPORT DATA
+  const handleExportBOMs = () => {
+    const data = boms.map((b, i) => ({
+      "No": i + 1, "Kode BOM": b.Code || b.code || "-", "Nama Resep": b.Name || b.name || "-",
+      "Jumlah Komponen": (b.Components || b.components || []).length
+    }));
+    downloadCSV(data, `Data_Master_BOM_${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
+  const handleExportOrders = () => {
+    const data = orders.map((o, i) => ({
+      "No": i + 1, "No. Produksi": o.OrderNumber || o.order_number || "-",
+      "Target Jadi (Qty)": o.TargetQuantity || o.target_quantity || 0,
+      "Status": (o.Status || o.status || "draft").toUpperCase()
+    }));
+    downloadCSV(data, `Data_Produksi_${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
   return (
     <div className="space-y-6 relative">
       
-      {/* --- MODAL DETAIL RESEP (BOM) --- */}
       {viewingBom && (
-        <div className="fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl border-t-4 border-t-indigo-500">
             <h3 className="font-bold text-xl text-gray-800 border-b pb-2 mb-4">📖 Detail Resep: {viewingBom.Name || viewingBom.name}</h3>
-            
             <div className="mb-4 bg-indigo-50 p-3 rounded text-sm text-indigo-900">
               <span className="font-semibold block text-xs text-indigo-500 uppercase mb-1">Menghasilkan Barang:</span>
               <span className="font-bold">{items.find(i => (i.ID||i.id) === (viewingBom.ItemID||viewingBom.item_id))?.Name || 'Barang Tidak Ditemukan'}</span>
             </div>
-
             <h4 className="font-bold text-gray-700 text-sm mb-2">Komponen Bahan Baku:</h4>
             <div className="bg-gray-50 border rounded p-3 mb-6 max-h-48 overflow-y-auto">
               <ul className="space-y-2">
@@ -146,27 +161,21 @@ export default function ManufacturingPage() {
         </div>
       )}
 
-      {/* --- KONTEN UTAMA --- */}
-      <div className="flex justify-between items-center border-b pb-4">
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b pb-4">
         <h1 className="text-2xl font-bold text-gray-800">🏭 Modul Pabrik & Manufaktur</h1>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           <button onClick={() => setActiveTab('boms')} className={`px-4 py-2 font-bold rounded ${activeTab === 'boms' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}>1. Master Resep (BOM)</button>
           <button onClick={() => setActiveTab('orders')} className={`px-4 py-2 font-bold rounded ${activeTab === 'orders' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-700'}`}>2. Eksekusi Produksi</button>
         </div>
       </div>
 
-      {/* --- TAB RESEP BOM --- */}
       {activeTab === 'boms' && (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in-up">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-indigo-100 relative">
-            {editingBomId && (
-              <div className="absolute top-0 right-0 bg-amber-500 text-white px-4 py-1 rounded-bl-xl rounded-tr-xl font-bold text-xs animate-pulse">
-                ✏️ Sedang Mode Edit
-              </div>
-            )}
+            {editingBomId && <div className="absolute top-0 right-0 bg-amber-500 text-white px-4 py-1 rounded-bl-xl rounded-tr-xl font-bold text-xs animate-pulse">✏️ Sedang Mode Edit</div>}
             <h2 className="text-lg font-bold text-indigo-800 mb-4">{editingBomId ? 'Edit Resep Tersimpan' : 'Buat Resep Baru'}</h2>
             <form onSubmit={submitBom} className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div><label className="block text-xs font-bold mb-1">Kode BOM</label><input readOnly value={bomForm.code} className="w-full p-2 border bg-gray-100 rounded text-gray-500" /></div>
                 <div><label className="block text-xs font-bold mb-1">Nama Resep</label><input required value={bomForm.name} onChange={e => setBomForm({...bomForm, name: e.target.value})} className="w-full p-2 border rounded" placeholder="Resep Meja Kayu..." /></div>
                 <div>
@@ -180,8 +189,8 @@ export default function ManufacturingPage() {
               <div className="bg-gray-50 p-4 border rounded">
                 <h3 className="text-sm font-bold mb-2 flex justify-between">Komponen Bahan Baku<button type="button" onClick={handleAddComp} className="text-xs bg-indigo-500 text-white px-2 py-1 rounded shadow">+ Tambah Bahan</button></h3>
                 {bomForm.components.map((comp, idx) => (
-                  <div key={idx} className="flex gap-2 mb-2 items-center">
-                    <select required value={comp.material_id} onChange={e => handleCompChange(idx, 'material_id', e.target.value)} className="flex-1 p-2 border rounded text-sm">
+                  <div key={idx} className="flex gap-2 mb-2 items-center flex-wrap md:flex-nowrap">
+                    <select required value={comp.material_id} onChange={e => handleCompChange(idx, 'material_id', e.target.value)} className="flex-1 min-w-[150px] p-2 border rounded text-sm">
                       <option value="">-- Pilih Bahan --</option>
                       {items.map(i => <option key={i.ID||i.id} value={i.ID||i.id}>{i.Name||i.name} (Stok: {i.Stock||i.stock})</option>)}
                     </select>
@@ -204,9 +213,13 @@ export default function ManufacturingPage() {
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h2 className="text-lg font-bold text-gray-700 mb-4">Daftar Resep Tersimpan</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-700">Daftar Resep Tersimpan</h2>
+              <button onClick={handleExportBOMs} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition">📊 Download CSV</button>
+            </div>
+            {/* 🔥 BUNGKUSAN PELINDUNG TABEL 🔥 */}
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left border-collapse min-w-[700px]">
                 <thead className="bg-gray-50 text-xs uppercase text-gray-600">
                   <tr><th className="p-4 border-b">Kode BOM</th><th className="p-4 border-b">Nama Resep</th><th className="p-4 border-b text-center">Jml Komponen</th><th className="p-4 border-b text-right">Aksi</th></tr>
                 </thead>
@@ -216,7 +229,7 @@ export default function ManufacturingPage() {
                       <td className="p-4 font-bold text-indigo-600">{b.Code||b.code}</td>
                       <td className="p-4 font-medium">{b.Name||b.name}</td>
                       <td className="p-4 text-center text-gray-500 font-semibold">{(b.Components||b.components||[]).length} Bahan</td>
-                      <td className="p-4 text-right space-x-2">
+                      <td className="p-4 text-right space-x-2 whitespace-nowrap">
                         <button onClick={() => setViewingBom(b)} className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded text-xs font-bold border">👁️ Detail</button>
                         <button onClick={() => handleEditBom(b)} className="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 rounded text-xs font-bold">✏️ Edit</button>
                         <button onClick={() => deleteBom(b.ID||b.id, b.Name||b.name)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs font-bold">🗑️ Hapus</button>
@@ -230,12 +243,11 @@ export default function ManufacturingPage() {
         </div>
       )}
 
-      {/* --- TAB PERINTAH PRODUKSI --- */}
       {activeTab === 'orders' && (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in-up">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-emerald-100 border-t-4 border-t-emerald-500">
             <h2 className="text-lg font-bold text-gray-700 mb-4">Terbitkan Perintah Produksi</h2>
-            <form onSubmit={submitOrder} className="grid grid-cols-4 gap-4">
+            <form onSubmit={submitOrder} className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div><label className="block text-xs font-bold mb-1">Pilih Resep</label><select required value={orderForm.bom_id} onChange={e => setOrderForm({...orderForm, bom_id: e.target.value})} className="w-full p-2 border rounded text-sm"><option value="">-- Pilih BOM --</option>{boms.map(b => <option key={b.ID||b.id} value={b.ID||b.id}>{b.Name||b.name}</option>)}</select></div>
               <div><label className="block text-xs font-bold mb-1">Gudang Operasi</label><select required value={orderForm.warehouse_id} onChange={e => setOrderForm({...orderForm, warehouse_id: e.target.value})} className="w-full p-2 border rounded text-sm"><option value="">-- Pilih Gudang --</option>{warehouses.map(w => <option key={w.ID||w.id} value={w.ID||w.id}>{w.Name||w.name}</option>)}</select></div>
               <div><label className="block text-xs font-bold mb-1">Target Jadi (Qty)</label><input type="number" min="1" required value={orderForm.target_quantity} onChange={e => setOrderForm({...orderForm, target_quantity: e.target.value})} className="w-full p-2 border rounded text-sm" /></div>
@@ -244,25 +256,32 @@ export default function ManufacturingPage() {
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border">
-            <table className="w-full text-left">
-              <thead className="bg-gray-50 text-xs uppercase text-gray-600">
-                <tr><th className="p-4 border-b">No. Produksi</th><th className="p-4 border-b text-center">Target</th><th className="p-4 border-b text-center">Status</th><th className="p-4 border-b text-right">Eksekusi</th></tr>
-              </thead>
-              <tbody className="text-sm">
-                {orders.map(o => (
-                  <tr key={o.ID||o.id} className="hover:bg-gray-50 border-b">
-                    <td className="p-4 font-bold text-gray-800">{o.OrderNumber||o.order_number}</td>
-                    <td className="p-4 text-center font-bold">{o.TargetQuantity||o.target_quantity} Unit</td>
-                    <td className="p-4 text-center"><span className={`px-2 py-1 rounded text-xs font-bold ${(o.Status||o.status) === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{(o.Status||o.status).toUpperCase()}</span></td>
-                    <td className="p-4 text-right">
-                      {(o.Status||o.status) !== 'completed' ? (
-                        <button onClick={() => completeProduction(o.ID||o.id, o.OrderNumber||o.order_number)} className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold">🏭 Selesai</button>
-                      ) : <span className="text-gray-400 italic font-medium">Selesai</span>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="flex justify-between items-center p-4 border-b">
+              <h2 className="text-lg font-bold text-gray-700">Antrean Produksi</h2>
+              <button onClick={handleExportOrders} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition">📊 Download CSV</button>
+            </div>
+            {/* 🔥 BUNGKUSAN PELINDUNG TABEL 🔥 */}
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left border-collapse min-w-[700px]">
+                <thead className="bg-gray-50 text-xs uppercase text-gray-600">
+                  <tr><th className="p-4 border-b">No. Produksi</th><th className="p-4 border-b text-center">Target</th><th className="p-4 border-b text-center">Status</th><th className="p-4 border-b text-right">Eksekusi</th></tr>
+                </thead>
+                <tbody className="text-sm">
+                  {orders.length === 0 ? <tr><td colSpan="4" className="p-6 text-center text-gray-400">Belum ada perintah produksi.</td></tr> : orders.map(o => (
+                    <tr key={o.ID||o.id} className="hover:bg-gray-50 border-b">
+                      <td className="p-4 font-bold text-gray-800">{o.OrderNumber||o.order_number}</td>
+                      <td className="p-4 text-center font-bold">{o.TargetQuantity||o.target_quantity} Unit</td>
+                      <td className="p-4 text-center"><span className={`px-2 py-1 rounded text-xs font-bold ${(o.Status||o.status) === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{(o.Status||o.status).toUpperCase()}</span></td>
+                      <td className="p-4 text-right">
+                        {(o.Status||o.status) !== 'completed' ? (
+                          <button onClick={() => completeProduction(o.ID||o.id, o.OrderNumber||o.order_number)} className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold whitespace-nowrap">🏭 Selesai & Masuk Gudang</button>
+                        ) : <span className="text-gray-400 italic font-medium">Selesai</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
